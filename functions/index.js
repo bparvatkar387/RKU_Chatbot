@@ -138,6 +138,7 @@ let functionCompleted = false;
 const myDebugStart = () => {
     debug.isReady().then(() => {
         debugInitialized = true;
+        functionCompleted = false;
 
         if (functionCompleted) {
             console.log('terminating function');
@@ -145,11 +146,11 @@ const myDebugStart = () => {
     });
 }
 
-const myDebugStop = () => {
+const myDebugStop = (name) => {
     functionCompleted = true;
 
     if (debugInitialized) {
-        console.log('terminating function');
+        console.log('terminating function: ' + name);
     }
 }
 
@@ -160,24 +161,26 @@ app.intent('school branches all', (conv, {rkuSchools, degType = ''}) => {
     // check if screen is available
     if (!conv.screen) {
         conv.ask('Please try a screen device to view the output');
-        myDebugStop();
+        myDebugStop('screen');
         return;
     }
     if (rkuSchools === '' && conv.data.rkuSchools === '') {
+        console.log('schBranchAll: Asking for school info');
         conv.ask('Which school//college information would you like to have?');
         conv.ask(new Suggestions(['Engineering', 'Physiotherapy']));
         myDebugStart();
         return;
     } else if (conv.data.rkuSchools !== rkuSchools) {
-        console.log('Setting rkuSchool from ' + conv.data.rkuSchools + ' to ' + rkuSchools);
+        console.log('schBranchAll: Setting rkuSchool from ' + conv.data.rkuSchools + ' to ' + rkuSchools);
         conv.data.rkuSchools = rkuSchools;
     }
     // for degree
     if (degType === '') {
+        console.log('schBranchAll: Asking for degree info');
         // eslint-disable-next-line max-len
         conv.ask('Would you like to view Bachelors Degree or Masters Degree information?');
         conv.ask(new Suggestions(['Bachelors', 'Masters']));
-        myDebugStop();
+        myDebugStop('checking degree');
         return;
     } else {
         conv.data.degType = degType.toLowerCase();
@@ -185,6 +188,8 @@ app.intent('school branches all', (conv, {rkuSchools, degType = ''}) => {
     // bachelors degree
     // eslint-disable-next-line max-len
     if (degType in ['bach', 'bachelors', 'bachelor', 'ug', 'under graduation']) {
+        console.log('schBranchAll: Creating list for bachelors');
+
         conv.ask('Here is your information');
         if (rkuSchools === 'soe') {
             let mList = showAllSchoolDegrees('soe');
@@ -196,6 +201,8 @@ app.intent('school branches all', (conv, {rkuSchools, degType = ''}) => {
 
         }
     } else if (degType === 'masters') {
+        console.log('schBranchAll: Creating list for masters');
+
         conv.ask('Here is your information');
         if (rkuSchools === 'soe') {
             let mList = showAllSchoolDegrees('soe', 'masters');
@@ -207,7 +214,7 @@ app.intent('school branches all', (conv, {rkuSchools, degType = ''}) => {
         }
     }
 
-    myDebugStop();
+    myDebugStop('reached end of function');
 
 });
 
